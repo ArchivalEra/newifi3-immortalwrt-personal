@@ -1,0 +1,6 @@
+#!/bin/sh
+# 首次开机若 root 仍为空密码，在 banner 提示立即设置
+if grep -q '^root::' /etc/shadow 2>/dev/null || [ -z "$(awk -F: '$1=="root"{print $2}' /etc/shadow)" ]; then
+  sed -i '1i\\n⚠  ROOT 密码为空！请立即执行: passwd\n' /etc/banner
+fi
+exit 0

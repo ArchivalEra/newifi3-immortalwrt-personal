@@ -1,0 +1,6 @@
+#!/bin/sh
+# 出厂唯一改动：LAN 改为 192.168.50.1/24（用户指定）
+uci -q set network.lan.ipaddr='192.168.50.1'
+uci -q set network.lan.netmask='255.255.255.0'
+uci commit network
+exit 0

@@ -1,0 +1,30 @@
+config global
+	option anon_swap '0'
+	option anon_mount '0'
+	option auto_swap '1'
+	option auto_mount '1'
+	option delay_root '5'
+	option check_fs '0'
+
+# 1T HDD（USB3）分区方案（用户指定）：
+#   /dev/sda1  ext4  40G    系统（extroot overlay + 后续 LuCI/包）
+#   /dev/sda2  swap  10G    交换（swappiness=5）
+#   /dev/sda3  xfs   ~881GiB  数据（/mnt/data，吞吐优先）
+# 注：若未插盘/未格式化，block-mount 自动跳过 → flash overlay 照常（fallback）
+
+config mount
+	option target '/overlay'
+	option device '/dev/sda1'
+	option fstype 'ext4'
+	option enabled '1'
+	option is_rootfs '1'
+
+config swap
+	option device '/dev/sda2'
+	option enabled '1'
+
+config mount
+	option target '/mnt/data'
+	option device '/dev/sda3'
+	option fstype 'xfs'
+	option enabled '1'

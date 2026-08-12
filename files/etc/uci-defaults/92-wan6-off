@@ -1,0 +1,6 @@
+#!/bin/sh
+# IPv6 默认关（伪装完整）；wan6 模块在硬盘上按需启用 A/B 形态
+uci -q set network.wan6.disabled='1'
+uci -q set network.lan.ipv6='0'
+uci commit network
+exit 0

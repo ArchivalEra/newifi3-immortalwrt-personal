@@ -1,27 +1,36 @@
 # portal — 校园网认证模块（寄生模块，可摘除）
 
-**用途**：H3C 校园网 Web 认证 + 保活。启用前系统是出厂路由器（无认证逻辑）；`remove.sh` 摘除即回退。
+**用途**：H3C 校园网 Web 认证 + 保活。`install.sh` 部署，`remove.sh` 摘除即回退出厂路由器。
 
-## 内容
+## 结构（install.sh 部署到 /etc/portal/）
 
 ```
-portal/
-├── PortalAuthenticator/     认证执行器：A 通用表单 / B 录制重放 / C H3C 模板（学校网关已确认 H3C）
-├── AuthenticatorTriggers/   触发器：a 常驻保活(5min) / b 慵懒(15-30min) / c 手动 —— 共用认证器接口
-├── install.sh               部署到系统 + 注册 init.d
-└── remove.sh                卸载，回退出厂
+/etc/portal/
+├── probe.sh                  连通性探测（探针被重定向到门户/返回登录页 → 掉线）
+├── authenticate.sh           认证分发器（按 PORTAL_MODE 调对应认证器）
+├── PortalAuthenticator/
+│   ├── generic-form/         (A) 通用表单解析：抓登录页→解析字段→POST→成功标记验证
+│   ├── record-replay/        (B) 录制重放：浏览器 Copy as cURL → capture 文件重放
+│   └── h3c-template/         (C) H3C 模板（主模块）：字段/挑战码配置驱动，DUMP 调试
+└── AuthenticatorTriggers/
+    ├── keepalive-daemon/     (a) 常驻保活：每 KEEPALIVE_INTERVAL(默认300s) 探测，掉线自动重登
+    ├── lazy/                 (b) 慵懒：LAZY_INTERVAL(默认1800s)，断网才重登
+    └── manual/               (c) 手动：跑一次 探测+重登（可配 cron）
 ```
 
-## 安装流程（install.sh 做什么）
+## 接口约定
 
-1. 部署 `PortalAuthenticator/` + `AuthenticatorTriggers/` → `/etc/portal/`（认证器 + 触发器）
-2. 生成 `/etc/portal.conf` 模板（root-only 0600）：URL / 用户名 / 密码 / UA / 探针 URL / 成功标记 —— **刷机后填真实值**（H3C 页面结构待实机抓取）
-3. 注册 `/etc/init.d/portal-keepalive`（触发器模式可配置：keepalive-daemon / lazy / manual）
-4. 不写死任何认证逻辑进系统默认 —— 全部模块内
+- 认证器入口统一：`/etc/portal/PortalAuthenticator/<mode>/authenticate.sh` → exit 0=成功 / 1=失败 / 2=未配置
+- 触发器统一：`/etc/portal/AuthenticatorTriggers/<mode>/run.sh`（keepalive/lazy 为循环常驻，manual 单次）
+- 全部配置在 `/etc/portal.conf`（root-only 0600），调参不重编译
 
-## 摘除（remove.sh）
+## 使用流程（刷机后）
 
-删除 `/etc/portal/`、`/etc/portal.conf`、init.d 脚本 → 系统回到出厂路由器。
+1. `install.sh` → 生成 `/etc/portal.conf` 模板
+2. `DUMP=1` 跑 h3c-template 认证器 → 抓登录页存 `/tmp/portal_dump.html` → 填 URL/字段/挑战码
+3. `TRIGGER=keepalive-daemon`（或 lazy/manual）→ `service portal-keepalive start`
+4. 看日志：`logread | grep portal-`
+5. 换模式：改 `/etc/portal.conf` 的 TRIGGER → `service portal-keepalive restart`
 
 ## 安全（票 3 决议）
 
