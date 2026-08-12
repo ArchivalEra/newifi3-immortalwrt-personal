@@ -10,7 +10,7 @@
 - HITL 票用 /grilling 对话式推进（用户本人参与）；AFK 票用 research 子代理
 - 用户硬性偏好：底座 **ImmortalWrt 25.12.1（Stable, 2026-07-06）**；"硬件加速的所有相关选项"都要入选；伪装诉求"所有子网设备伪装为一个且 UA 正常"；WiFi 驱动保留、默认 radio 关（备用顶上）；flash 上纯 SSH、LuCI 之后装进 ext4；**只改动 newifi3/ 文件夹**（仓库是 rime/plum，不碰它的 git/issues）；中文交流
 - 用户网络流量受限：构建/大下载必须等 WiFi 环境
-- 关键硬件事实（待票 1 核实）：PPE 硬件分载逐包绕开 netfilter → 固定值 TTL 改写只能软件路径；SFE 与 PPE 硬分载互斥（社区共识）
+- 关键硬件事实（票 1 已核实）：PPE 硬件分载逐包绕开 netfilter → 固定值 TTL 改写只能软件路径；**SFE 在 25.12.1 官方 feed 中不存在**（只能自编第三方 feed，排除）；`ip ttl set 64` 在 nftables 1.1.6 可用，xt_TCPOPTSTRIP 无；mtk_ppe hw offload 可用但有已知稳定性问题（openwrt#24459 watchdog 重启等）；breed 默认关 USB 供电需 `newifi-d2.usb_pwr_en=1`
 
 ## Decisions so far
 
@@ -21,6 +21,7 @@
 - WAN=DHCP（校园网），关 IPv6；WAN 固定 MAC + 单 IP NAT；设备 UA 不动，路由器 portal 请求用真实浏览器 UA
 - 硬盘：ext4=系统盘（extroot overlay + swap）、XFS=数据盘（/mnt/data 只挂载）；flash 纯 SSH，LuCI 以后 opkg 装进 ext4 overlay
 - 华为 AX3000 作 AP 桥接挂在 LAN 下（其固件改造见 Out of scope）
+- 票1（研究）已关闭：SFE 出局；TTL 伪装 = nft `ip ttl set 64`（软分载路径）；hw offload 存在已知稳定性风险（openwrt#24459 等），默认档与切换形态待票 2 裁决；breed 刷机必须项 = 环境变量 `newifi-d2.usb_pwr_en=1`（USB 供电）+ 分区名 u-boot
 
 ## Not yet specified
 
