@@ -23,12 +23,13 @@
 - 华为 AX3000 作 AP 桥接挂在 LAN 下（其固件改造见 Out of scope）
 - 票1（研究）已关闭：SFE 出局；TTL 伪装 = nft `ip ttl set 64`（软分载路径）；hw offload 存在已知稳定性风险（openwrt#24459 等），默认档与切换形态待票 2 裁决；breed 刷机必须项 = 环境变量 `newifi-d2.usb_pwr_en=1`（USB 供电）+ 分区名 u-boot
 - 票3（grilling）已关闭：Portal 框架 = `PortalAuthenticator/`（A 通用表单 / B 录制重放 / C H3C 模板 —— 学校网关确认为 **H3C**）+ `AuthenticatorTriggers/`（a 常驻保活 5min / b 慵懒 15-30min / c 手动，三模式共用认证器接口）；传输安全走 HTTPS（TLS ECDHE=一次性密钥）或 H3C 协议内置机制，不自创加密（服务器不认）；MT7621 无 AES 硬件引擎但登录仅几 KB、软件加密无压力；凭据 root-only、不落日志
+- 票2（grilling）已关闭：**默认=伪装完整档**（软分载 flow_offloading + fullcone + nft `ip ttl set 64` 逐包修正 + WAN 固定 MAC + 单 IP NAT + 关 v6 + UA 正常）；**hw offload=可选增强档**（配置双份+切换脚本，默认不启用，规避 #24459 watchdog 风险）；SFE 排除；TCP 时间戳等次要指纹先不做；**实机必测**=WAN 侧 TTL 一致性验证；拓扑：newifi3 仅有线主干，无线分流华为 AX3，S905 另一项目
 
 ## Not yet specified
 
 - 校园网认证网关品牌：**H3C（华三）**——用户已确认（票 3）；portal URL/表单结构仍未知
 - USB 硬盘供电/识别、实机硬分载与 SFE 稳定性、breed 首刷实测（需硬件）
-- 伪装清单中 TCP 时间戳/窗口大小等次要指纹的取舍（可能随票 2 解出）
+- 伪装清单中 TCP 时间戳/窗口大小等次要指纹的取舍 —— **已决：先不做**（票 2，实机验证后按需追加）
 
 ## Out of scope
 
