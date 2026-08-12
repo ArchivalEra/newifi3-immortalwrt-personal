@@ -9,6 +9,7 @@
 - 领域：MT7621 路由器（ramips/mt7621）、校园网 Web portal 认证、PPE 硬件加速/SFE、设备指纹伪装、NAS（ext4 系统盘 + XFS 数据盘）
 - HITL 票用 /grilling 对话式推进（用户本人参与）；AFK 票用 research 子代理
 - 用户硬性偏好：底座 **ImmortalWrt 25.12.1（Stable, 2026-07-06）**；"硬件加速的所有相关选项"都要入选；伪装诉求"所有子网设备伪装为一个且 UA 正常"；WiFi 驱动保留、默认 radio 关（备用顶上）；flash 上纯 SSH、LuCI 之后装进 ext4；**只改动 newifi3/ 文件夹**（仓库是 rime/plum，不碰它的 git/issues）；中文交流
+- **架构原则（用户 08-12 声明）**：flash 固件 = ImmortalWrt 出厂默认（唯一改动 LAN 192.168.50.1/24）；一切自定义（伪装/认证/v6/加速开关）都是**寄生模块**（hdd-modules/，装硬盘）；摘除模块=回退出厂默认路由器，硬件加速不受限；fallback 永远是系统默认配置
 - 用户网络流量受限：构建/大下载必须等 WiFi 环境
 - 关键硬件事实（票 1 已核实）：PPE 硬件分载逐包绕开 netfilter → 固定值 TTL 改写只能软件路径；**SFE 在 25.12.1 官方 feed 中不存在**（只能自编第三方 feed，排除）；`ip ttl set 64` 在 nftables 1.1.6 可用，xt_TCPOPTSTRIP 无；mtk_ppe hw offload 可用但有已知稳定性问题（openwrt#24459 watchdog 重启等）；breed 默认关 USB 供电需 `newifi-d2.usb_pwr_en=1`
 
