@@ -11,8 +11,12 @@ IB=/mnt/hdd/build-staff/immortalwrt-imagebuilder-25.12.1-ramips-mt7621.Linux-x86
 cd "$IB"
 
 # 出厂基础设施包（flash 内）：SSH + 挂盘引导 + 认证依赖 + 编辑器
-# 注：micro 为 Go 静态二进制，若超 IMAGE_SIZE 需从列表移除（改入 ext4）
-PACKAGES="dropbear curl block-mount blockd fdisk e2fsprogs xfsprogs nano micro"
+# 注：25.12 将 xfsprogs 拆包为 xfs-mkfs/xfs-fsck/xfs-growfs/xfs-admin（无 meta 包名）
+#     kmod-fs-ext4/xfs 为内核文件系统模块（挂载必需）
+#     -luci -default-settings-chn 移除 ImmortalWrt profile 默认的 luci 全家桶
+#       （default-settings-chn 依赖 luci 组件，flash 纯 SSH 不需要）
+#     micro 为 Go 静态二进制，若超 IMAGE_SIZE 需从列表移除（改入 ext4）
+PACKAGES="dropbear curl block-mount blockd fdisk e2fsprogs kmod-fs-ext4 kmod-fs-xfs xfs-mkfs xfs-fsck xfs-growfs xfs-admin nano micro -luci -default-settings-chn"
 
 echo "==> make image (PACKAGES=$PACKAGES, FILES=$ROOT/files)"
 make image PROFILE=d-team_newifi-d2 \
