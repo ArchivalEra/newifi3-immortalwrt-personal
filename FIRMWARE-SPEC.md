@@ -11,7 +11,8 @@
 | 维度 | 决策 |
 |---|---|
 | 角色 | 纯有线主干网关；无线分流华为 AX3（WiFi6 AP 桥接）；S905 一体机属另一项目 |
-| 伪装默认档 | 软分载（flow_offloading 1 + fullcone 1）+ nft `ip ttl set 64` 逐包修正 + WAN 固定 MAC + 单 IP NAT + 关 IPv6 + UA 正常 |
+| 伪装默认档 | 软分载（flow_offloading 1 + fullcone 1）+ nft `ip ttl set 64` 逐包修正 + WAN 固定 MAC + 单 IP NAT + IPv6 默认关 + UA 正常 |
+| IPv6 模块 | **默认关**（伪装完整）；`hdd-modules/wan6/` 放硬盘，三形态：OFF / A 双栈（WAN PD+LAN 分发）/ B 仅 WAN（LAN 不分发，伪装保留）——到校实测校园网是否发公网 v6 后决定（用户记忆里不发，待实测确认） |
 | 加速可选档 | `flow_offloading_hw 1`（PPE 硬分载）保留为可选增强档，配置双份 + 一键切换脚本，**默认不启用**（规避 openwrt#24459 watchdog 风险）；SFE 官方不存在，排除 |
 | Portal | 学校网关为 **H3C**；认证器 `PortalAuthenticator/`（A 通用表单 / B 录制重放 / C H3C 模板）+ 触发器 `AuthenticatorTriggers/`（a 常驻保活 5min / b 慵懒 15-30min / c 手动）；配置驱动不重编译；HTTPS 优先，不自创加密 |
 | 存储 | 1T HDD USB3：ext4 40G（extroot overlay）+ swap 10G（swappiness=5）+ XFS 剩余 → /mnt/data |
@@ -33,7 +34,7 @@
 | 项 | 值 |
 |---|---|
 | LAN | 192.168.50.1/24 |
-| WAN | DHCP；wan6 禁用；固定 MAC |
+| WAN | DHCP；固定 MAC；IPv6 默认关（wan6 模块放硬盘，A/B 形态到校实测公网 v6 后启用） |
 | firewall | flow_offloading 1 + fullcone 1；flow_offloading_hw 0 默认（可选档脚本切换） |
 | 伪装 | /etc/nftables.d/ 自定义规则：Lan→Wan forward `ip ttl set 64` |
 | fstab | ext4(40G) is_rootfs=1（extroot）；swap 10G；XFS → /mnt/data |
@@ -72,5 +73,6 @@ make image PROFILE=d-team_newifi-d2 PACKAGES="..." FILES=<newifi3/files>
 ## 7. 待实机后提供（配置驱动，不重编译）
 
 - 门户 URL / 页面结构 / 挑战码机制 / 证书情况（H3C）
+- **WAN 是否发放公网 IPv6**（决定 v6 模块启用 A/B/保持 OFF——用户记忆里不发，待实测）
 - WAN 侧 TTL 实测结果、hw offload 实机稳定性
 - 首次刷机验证（breed 环境变量、extroot 装配）
